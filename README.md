@@ -113,8 +113,7 @@ CPE631-Nav2-Controller-Comparison/
 ├── report/
 │   └── Bhagyath_Cpe_631_final_report.pdf
 │
-├── video/
-│   └── demo_video.mp4
+
 │
 ├── config/
 │   ├── nav2_dynamic_conservative_navfn_mppi.yaml
