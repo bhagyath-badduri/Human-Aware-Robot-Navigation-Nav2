@@ -1,0 +1,63 @@
+CPE 631 Final Project - Launch Commands
+Author: Bhagyath Badduri
+
+1. Source ROS 2 and workspace
+
+cd ~/cpe631_ws
+source /opt/ros/jazzy/setup.bash
+source install/setup.bash
+export TURTLEBOT3_MODEL=burger
+export RMW_FASTRTPS_USE_SHM=0
+
+
+2. Teleoperation for map construction
+
+ros2 run turtlebot3_teleop teleop_keyboard
+
+
+3. Save generated cafe map
+
+mkdir -p ~/cpe631_ws/maps
+
+ros2 run nav2_map_server map_saver_cli \
+  -f ~/cpe631_ws/maps/cafe
+
+
+4. Static navigation test with pedestrians disabled
+
+ros2 launch cpe631_ros2 cafe.launch.py \
+  navigation:=true \
+  mapping:=false \
+  map_file:=$HOME/cpe631_ws/src/CPE631-Navigation-ROS2/maps/cafe_abs.yaml \
+  enable_peds:=false
+
+
+5. Dynamic navigation test using NavFn with MPPI
+
+ros2 launch cpe631_ros2 cafe.launch.py \
+  navigation:=true \
+  mapping:=false \
+  map_file:=$HOME/cpe631_ws/src/CPE631-Navigation-ROS2/maps/cafe_abs.yaml \
+  params_file:=$HOME/cpe631_ws/src/CPE631-Navigation-ROS2/param/nav2_dynamic_conservative_navfn_mppi.yaml \
+  enable_peds:=true
+
+
+6. Dynamic navigation test using NavFn with DWB
+
+ros2 launch cpe631_ros2 cafe.launch.py \
+  navigation:=true \
+  mapping:=false \
+  map_file:=$HOME/cpe631_ws/src/CPE631-Navigation-ROS2/maps/cafe_abs.yaml \
+  params_file:=$HOME/cpe631_ws/src/CPE631-Navigation-ROS2/param/nav2_dynamic_conservative_navfn_dwb.yaml \
+  enable_peds:=true
+
+
+7. Run metrics logger
+
+python3 ~/cpe631_ws/nav_metrics_logger.py --run navfn_mppi_test1
+
+Example run names:
+navfn_mppi_test1
+navfn_mppi_test2
+navfn_dwb_test1
+navfn_dwb_test2
