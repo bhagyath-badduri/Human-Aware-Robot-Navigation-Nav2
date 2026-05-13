@@ -103,6 +103,8 @@ The DWB controller also completed both test cases. It produced a more direct pat
 
 Overall, the results showed that local controller selection has a clear effect on path distance, navigation time, obstacle response, and robot behavior near pedestrians.
 
+For detailed implementation steps, screenshots, terminal commands, performance results, and discussion, please refer to the final project report included in the `report/` folder.
+
 ## Repository Structure
 
 ```text
