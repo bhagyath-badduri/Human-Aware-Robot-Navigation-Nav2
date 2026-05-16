@@ -1,6 +1,6 @@
 # Human-Aware-Robot-Navigation-Nav2
 ROS 2 Nav2 project comparing MPPI and DWB controllers for TurtleBot3 human-aware navigation in a dynamic cafe environment with moving pedestrians.
-> **Note:** Individual result screenshots are not uploaded separately in this repository. All figures, screenshots, metrics, and result analysis are included in the final report PDF.
+> **Note:** Please check the uploaded report for more details and results. Individual result screenshots are not uploaded separately in this repository. All figures, screenshots, metrics, and result analysis are included in the final report PDF.
 # Performance Evaluation of Nav2 Controllers for Human-Aware Indoor Robot Navigation
 
 This repository contains the final project work for **CPE 631-A: Cooperative Autonomous Mobile Robots** at **Stevens Institute of Technology**.
