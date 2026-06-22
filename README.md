@@ -31,7 +31,7 @@ The global planner (NavFn) remained unchanged while only the local controller wa
 
 The project was carried out inside a simulated cafe environment containing static furniture and dynamic pedestrians.
 
-![Cafe Environment](Cafe%20Environment.png)
+![Cafe Environment](cafe_environment.png)
 
 ---
 
