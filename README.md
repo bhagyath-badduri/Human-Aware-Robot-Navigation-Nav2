@@ -1,186 +1,197 @@
-# Human-Aware-Robot-Navigation-Nav2
+# Project Workflow
 
-ROS 2 Nav2 project comparing MPPI and DWB controllers for TurtleBot3 human-aware navigation in a dynamic cafe environment with moving pedestrians.
+The project implements a complete autonomous mobile robot navigation pipeline in ROS 2. The robot first constructs an occupancy grid map of the environment, localizes itself within the map, plans a collision-free global path, and continuously computes safe local trajectories while navigating around moving pedestrians and static obstacles.
 
-> **Note:** Please refer to the uploaded final project report (**Bhagyath final_report.pdf**) for complete implementation details, controller configurations, parameter settings, and experimental analysis.
-
----
-
-# Performance Evaluation of Nav2 Controllers for Human-Aware Indoor Robot Navigation
-
-This repository contains the final project work for **CPE 631-A: Cooperative Autonomous Mobile Robots** at **Stevens Institute of Technology**.
-
-The project evaluates autonomous robot navigation in a simulated indoor cafe environment using **ROS 2 Jazzy**, **Gazebo**, **RViz**, **TurtleBot3 Burger**, and the **Nav2 Navigation Stack**. The objective is to compare the performance of **MPPI** and **DWB** local planners while navigating safely around static obstacles and moving pedestrians.
+The complete workflow consists of the following stages.
 
 ---
 
-# Project Objective
+## 1. Simulation Environment Setup
 
-Autonomous mobile robots operating in indoor human environments must safely reach a goal while avoiding walls, furniture, static obstacles, and moving pedestrians.
+A dynamic indoor cafe environment was launched in Gazebo using ROS 2 Jazzy.
 
-This project compares two controller configurations:
+The simulation includes:
 
-- **NavFn + MPPI Controller**
-- **NavFn + DWB Controller**
+- TurtleBot3 Burger mobile robot
+- Static obstacles such as tables, walls, and furniture
+- Dynamic pedestrians acting as moving obstacles
+- LiDAR sensor for environment perception
+- RViz for visualization
 
-The global planner (NavFn) remained unchanged while only the local controller was modified to evaluate navigation performance fairly.
-
----
-
-# Simulation Environment
-
-The project was carried out inside a simulated cafe environment containing static furniture and dynamic pedestrians.
+The environment provides a realistic indoor navigation scenario where the robot must safely interact with both static and dynamic objects.
 
 ![Cafe Environment](cafe_environment.png)
 
 ---
 
-# Project Workflow
+## 2. Occupancy Grid Map Generation
 
-## 1. Environment Setup
+Before autonomous navigation can begin, the robot must first understand its environment.
 
-- Configured ROS 2 Jazzy and Gazebo simulation
-- Loaded TurtleBot3 Burger model
-- Enabled pedestrian plugins to create a dynamic indoor environment
+The TurtleBot3 was manually teleoperated through the cafe while continuously collecting LiDAR laser scan data.
 
----
+Using the collected scan data, ROS generated a 2D occupancy grid map representing:
 
-## 2. Mapping
+- Free space
+- Occupied space
+- Unknown regions
 
-The robot was manually teleoperated to generate a 2D occupancy grid map using LiDAR data.
-
-The generated map was later reused for localization and autonomous navigation.
+This map serves as the global representation of the environment and is later reused for localization and path planning.
 
 ### Generated Occupancy Grid Map
 
-![Generated Map](Generated%20Map.png)
+![Generated Map](generated_map.png)
 
 ---
 
-## 3. Static Navigation Validation
+## 3. Robot Localization
 
-Before enabling moving pedestrians, the generated map was loaded into Nav2.
+Once the occupancy grid map was generated, the robot used Adaptive Monte Carlo Localization (AMCL) to estimate its position inside the map.
 
-AMCL localization, map server, planner server and controller server were verified by sending navigation goals from RViz.
+AMCL continuously compares incoming LiDAR measurements with the previously generated occupancy grid map to estimate the robot's pose.
+
+The localization process estimates:
+
+- Robot x-position
+- Robot y-position
+- Robot heading (yaw)
+
+Accurate localization is essential because both global planning and local navigation depend on knowing the robot's current pose.
+
+---
+
+## 4. Static Navigation Verification
+
+Before introducing moving pedestrians, the navigation system was validated in a static environment.
+
+The following Nav2 components were verified:
+
+- Map Server
+- AMCL Localization
+- NavFn Global Planner
+- Local Planner
+- Behavior Tree Navigator
+- Controller Server
+
+Navigation goals were sent from RViz to confirm that the robot could successfully reach the desired location without dynamic obstacles.
 
 ### Static Navigation
 
-![Static Navigation](Static%20Navigation.png)
+![Static Navigation](static_navigation.png)
 
 ---
 
-## 4. Dynamic Navigation
+## 5. Dynamic Human-Aware Navigation
 
-After successful localization, pedestrians were enabled and the robot navigated through a dynamic cafe environment.
+After successful validation, moving pedestrians were enabled inside the cafe environment.
 
-The robot continuously replanned its trajectory while avoiding moving people and static obstacles.
+During navigation the robot continuously performs the following operations:
+
+1. Receive LiDAR measurements
+2. Update the local costmap
+3. Detect nearby obstacles
+4. Replan local trajectories
+5. Generate safe velocity commands
+6. Continue toward the navigation goal
+
+Unlike static navigation, the robot must continuously adapt its motion because pedestrians move unpredictably throughout the environment.
 
 ### Dynamic Navigation
 
-![Dynamic Navigation](Dynamic%20Navigation.png)
+![Dynamic Navigation](dynamic_navigation.png)
 
 ---
 
-## Navigation Configurations
+## 6. Local Planner Comparison
 
-### NavFn + MPPI Controller
+The main objective of this project was to compare two different Nav2 local planners while keeping all other navigation components unchanged.
 
-The MPPI controller generates local trajectories by sampling multiple control sequences and selecting the trajectory with the minimum cost.
+### Configuration 1 — NavFn + MPPI
 
-Advantages:
+The MPPI (Model Predictive Path Integral) controller samples hundreds of possible future trajectories and evaluates each trajectory using multiple cost functions such as obstacle avoidance, path following, and goal tracking.
 
-- Smooth trajectory generation
+The trajectory with the minimum overall cost is selected to generate velocity commands.
+
+Advantages observed during testing:
+
+- Smooth robot motion
 - Better obstacle avoidance
-- Stable behavior around moving pedestrians
-
-*(Representative navigation behavior can be found in the final report.)*
+- More stable behavior around pedestrians
+- Conservative navigation in crowded environments
 
 ---
 
-### NavFn + DWB Controller
+### Configuration 2 — NavFn + DWB
 
-The Dynamic Window Approach evaluates multiple velocity commands using trajectory critics and selects the optimal command.
+The Dynamic Window Approach (DWB) controller evaluates multiple candidate velocity commands and scores each trajectory using several navigation critics.
 
-Advantages:
+These critics evaluate:
 
-- Fast local planning
+- Distance to goal
+- Distance from obstacles
+- Path alignment
+- Rotation behavior
+
+The highest scoring trajectory is selected for execution.
+
+Advantages observed:
+
+- Faster computation
 - Efficient path following
-- Lower computational complexity
+- More direct trajectories
 
-### DWB Navigation Example
+### DWB Navigation
 
-![DWB Result](DWB%20Result.png)
-
----
-
-# Additional Obstacle Scenario
-
-Besides the normal cafe environment, additional cylindrical and box obstacles were manually placed to increase navigation difficulty.
-
-This allowed evaluation of controller robustness under more cluttered conditions.
-
-![Additional Obstacles](Additional%20Obstacles.png)
+![DWB Result](dwb_result.png)
 
 ---
 
-# Performance Evaluation
+## 7. Navigation in Cluttered Environments
 
-Navigation performance was evaluated using a custom Python metrics logger.
+To further evaluate controller robustness, additional cylindrical and cuboid obstacles were manually inserted into the environment.
 
-The following metrics were recorded:
+These obstacles reduced the available free space and forced the local planners to generate more complex avoidance trajectories.
 
-- Navigation Time
-- Path Distance
-- Minimum Obstacle Distance
-- Number of Close Encounters
+This experiment demonstrates controller performance under increasingly difficult navigation scenarios.
+
+![Additional Obstacles](additional_obstacles.png)
+
+---
+
+## 8. Performance Evaluation
+
+A custom Python-based metrics logger was developed to quantitatively compare both controllers.
+
+The following performance metrics were recorded for every navigation experiment:
+
+- Total navigation time
+- Total path length
+- Minimum obstacle distance
+- Number of close encounters
+
+These metrics were used to evaluate navigation efficiency, safety, and controller behavior.
 
 ### Performance Metrics
 
-![Performance Metrics](Performance%20Metrics.png)
+![Performance Metrics](performance_metrics.png)
 
 ---
 
-# Results Summary
+## Results Summary
 
-Both controller configurations successfully completed the navigation task.
+Both MPPI and DWB successfully completed all navigation tasks.
 
 ### MPPI
 
 - Produced smoother trajectories
-- Better handled pedestrian interactions
-- Required longer navigation time in cluttered environments due to conservative obstacle avoidance
+- Better handled moving pedestrians
+- Generated safer obstacle avoidance behavior
+- Required longer navigation time in highly cluttered environments due to conservative planning
 
 ### DWB
 
-- Produced shorter paths in several scenarios
-- More dependent on critic tuning
-- Required careful parameter adjustment in crowded environments
+- Generated shorter paths in several scenarios
+- Required careful critic parameter tuning
+- Produced faster responses but exhibited less smooth motion in crowded environments
 
-Overall, the project demonstrates how the choice of local planner significantly influences:
-
-- Navigation time
-- Path smoothness
-- Obstacle avoidance
-- Human-aware navigation behavior
-
----
-
-# Repository Structure
-
-```text
-Human-Aware-Robot-Navigation-Nav2/
-│
-├── README.md
-├── Bhagyath final_report.pdf
-│
-├── Cpe-631_code_file/
-│
-├── Cafe Environment.png
-├── Generated Map.png
-├── Static Navigation.png
-├── Dynamic Navigation.png
-├── Additional Obstacles.png
-├── DWB Result.png
-├── Performance Metrics.png
-│
-└── LICENSE
+Overall, the project demonstrates how local planner selection significantly influences navigation performance in human-populated indoor environments. The comparison highlights the trade-offs between smoothness, computational efficiency, obstacle avoidance, and overall navigation safety.
