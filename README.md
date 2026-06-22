@@ -1,6 +1,7 @@
 # Human-Aware-Robot-Navigation-Nav2
+
 ROS 2 Nav2 project comparing MPPI and DWB controllers for TurtleBot3 human-aware navigation in a dynamic cafe environment with moving pedestrians.
-> **Note:** Please check the uploaded report for more details and results. Individual result screenshots are not uploaded separately in this repository. All figures, screenshots, metrics, and result analysis are included in the final report PDF.
+
 # Performance Evaluation of Nav2 Controllers for Human-Aware Indoor Robot Navigation
 
 This repository contains the final project work for **CPE 631-A: Cooperative Autonomous Mobile Robots** at **Stevens Institute of Technology**.
@@ -18,6 +19,10 @@ The project compares two controller configurations:
 
 The NavFn global planner was kept the same for both configurations. Only the local controller was changed so that the effect of the local controller could be compared clearly.
 
+## Simulation Environment
+
+![Cafe Environment](simulation_environment.png)
+
 ## What Was Done
 
 The project followed a complete ROS 2 Nav2 navigation workflow:
@@ -32,16 +37,28 @@ The project followed a complete ROS 2 Nav2 navigation workflow:
    - Laser scan data was used to build the cafe occupancy grid map.
    - The generated map was saved and later reused for localization and navigation.
 
+### Occupancy Grid Map
+
+![Generated Map](generated_map.png)
+
 3. **Static navigation verification**
    - The saved cafe map was loaded using the Nav2 map server.
    - AMCL was used to localize the robot.
    - Pedestrians were disabled first.
    - A navigation goal was assigned in RViz to verify that the map, localization, planner, controller, and goal interface were working correctly.
 
+### Static Navigation Verification
+
+![Static Navigation](static_navigation.png)
+
 4. **Dynamic navigation testing**
    - Pedestrians were enabled in the simulation.
    - The robot was tested in a dynamic cafe environment.
    - The same environment, robot model, map, and global planner were used for both controller configurations.
+
+### Dynamic Navigation with Pedestrians
+
+![Dynamic Navigation](dynamic_navigation.png)
 
 5. **Controller comparison**
    - NavFn with MPPI was tested first.
@@ -62,11 +79,15 @@ In this configuration, NavFn generated the global path from the robot position t
 
 This configuration was useful for studying smooth local motion and obstacle response in a dynamic environment.
 
+![MPPI Result](mppi_result.png)
+
 ### NavFn with DWB
 
 In this configuration, NavFn was again used as the global planner. The local controller was changed to DWB. DWB samples possible velocity commands and scores each trajectory using different critics such as path following, goal distance, obstacle distance, and rotation behavior.
 
 This configuration was useful for comparing a trajectory-scoring local controller against the MPPI controller.
+
+![DWB Result](dwb_result.png)
 
 ## Test Cases
 
@@ -81,6 +102,10 @@ Four total dynamic navigation tests were performed:
 
 The additional obstacle tests included manually placed cylinders and cubes to reduce free space and make the navigation task more difficult.
 
+### Additional Obstacle Scenario
+
+![Additional Obstacles](additional_obstacles.png)
+
 ## Performance Metrics
 
 The following metrics were recorded for each navigation run:
@@ -91,6 +116,10 @@ The following metrics were recorded for each navigation run:
 | Robot path distance | Total distance traveled by the robot |
 | Minimum scan distance | Closest detected obstacle distance during the run |
 | Close encounters | Number of times the robot came below the selected distance threshold |
+
+### Recorded Results
+
+![Performance Metrics](performance_metrics.png)
 
 These metrics were used together with RViz and Gazebo observations to understand the robot behavior.
 
@@ -104,6 +133,16 @@ The DWB controller also completed both test cases. It produced a more direct pat
 
 Overall, the results showed that local controller selection has a clear effect on path distance, navigation time, obstacle response, and robot behavior near pedestrians.
 
+## Qualitative Comparison
+
+### MPPI Controller Trajectory
+
+![MPPI Controller](mppi_controller.png)
+
+### DWB Controller Trajectory
+
+![DWB Controller](dwb_controller.png)
+
 For detailed implementation steps, screenshots, terminal commands, performance results, and discussion, please refer to the final project report included in the `report/` folder.
 
 ## Repository Structure
@@ -116,8 +155,6 @@ CPE631-Nav2-Controller-Comparison/
 ├── report/
 │   └── Bhagyath_Cpe_631_final_report.pdf
 │
-
-│
 ├── config/
 │   ├── nav2_dynamic_conservative_navfn_mppi.yaml
 │   └── nav2_dynamic_conservative_navfn_dwb.yaml
@@ -125,4 +162,13 @@ CPE631-Nav2-Controller-Comparison/
 ├── scripts/
 │   └── nav_metrics_logger.py
 │
-└── launch_commands.txt
+├── simulation_environment.png
+├── generated_map.png
+├── static_navigation.png
+├── dynamic_navigation.png
+├── additional_obstacles.png
+├── performance_metrics.png
+├── mppi_result.png
+├── dwb_result.png
+├── mppi_controller.png
+└── dwb_controller.png
